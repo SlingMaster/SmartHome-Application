@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <Preference
+        android:defaultValue="@string/version"
+        android:icon="@mipmap/ic_launcher"
+        android:key="version"
+        android:selectable="false"
+        android:shouldDisableView="false"
+        android:summary="@string/version"
+        android:title="@string/about_app_title"></Preference>
+
+<Preference
+    android:icon="@drawable/ic_copyright"
+    android:selectable="false"
+    android:shouldDisableView="false"
+    android:summary="@string/about_copyright"
+    android:title="@string/empty">
+
+</Preference>
+
+</PreferenceScreen>

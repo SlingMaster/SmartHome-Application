@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <Preference
+        android:icon="@drawable/ic_insert_link"
+        android:selectable="false"
+        android:shouldDisableView="false"
+        android:title="@string/advanced_group_title"></Preference>
+    <EditTextPreference
+        android:capitalize="words"
+        android:defaultValue="@string/default_debug_sh_url"
+        android:icon="@drawable/ic_menu_smart_home"
+        android:inputType="textCapWords"
+        android:key="dev_sh_url"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:summary="@string/default_debug_sh_url"
+        android:title="@string/edit_dev_sh" />
+    <EditTextPreference
+        android:capitalize="words"
+        android:defaultValue="@string/default_debug_br_url"
+        android:icon="@drawable/ic_menu_bathroom_control"
+        android:inputType="textCapWords"
+        android:key="dev_br_url"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:summary="@string/default_debug_br_url"
+        android:title="@string/edit_dev_br" />
+    <EditTextPreference
+        android:capitalize="words"
+        android:defaultValue="@string/default_debug_stats_url"
+        android:icon="@drawable/ic_menu_statistic"
+        android:inputType="textCapWords"
+        android:key="dev_stats_url"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:summary="@string/default_debug_stats_url"
+        android:title="@string/edit_dev_stats" />
+    <EditTextPreference
+        android:capitalize="words"
+        android:defaultValue="@string/default_debug_test_url"
+        android:icon="@drawable/ic_menu_test_measurement"
+        android:inputType="textCapWords"
+        android:key="dev_test_url"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:summary="@string/default_debug_test_url"
+        android:title="@string/edit_dev_test" />
+</PreferenceScreen>

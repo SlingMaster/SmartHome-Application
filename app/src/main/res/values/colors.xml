@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--color name="colorPrimary">#01579b</color-->
+    <!--color name="colorPrimary">#263238</color-->
+    <!--color name="colorAccent">#00e5ff</color-->
+    <!--color name="colorAccent">#0090D0</color-->
+    <color name="colorPrimary">@color/colorPrimaryDark</color>
+    <color name="colorPrimaryDark">#000a12</color>
+    <color name="colorAccent">#0091EA</color>
+    <color name="colorPreferencesBg">@color/colorPrimaryDark</color>
+    <!--color name="colorPreferencesBg">#FF2C4350</color-->
+    <color name="colorIcons">@color/colorAccent</color>
+    <color name="colorIconsTitle">@android:color/white</color>
+    <color name="colorDebugIcon">#f9a825</color>
+
+
+    <color name="item_text_date">#cfd8dc</color>
+    <!--color name="item_text_time">#819ca9</color-->
+    <color name="item_text_time">#7D929D</color>
+    <color name="item_text_delta">#0faba5</color>
+    <color name="item_text_warmer">#FF0031</color>
+</resources>

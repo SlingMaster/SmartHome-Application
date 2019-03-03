@@ -1,0 +1,23 @@
+<preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- These settings headers are only used on tablets. -->
+
+    <header
+        android:fragment="com.jsc.smarthome.SettingsActivity$GeneralPreferenceFragment"
+        android:icon="@drawable/ic_menu_preferences"
+        android:title="@string/pref_header_general"
+        android:summary="@string/pref_summary_general" />
+
+    <header
+        android:fragment="com.jsc.smarthome.SettingsActivity$AdvancedPreferenceFragment"
+        android:icon="@drawable/ic_advanced"
+        android:title="@string/pref_header_advanced"
+        android:summary="@string/pref_summary_advanced" />
+
+    <header
+        android:fragment="com.jsc.smarthome.SettingsActivity$AboutPreferenceFragment"
+        android:icon="@drawable/ic_info"
+        android:title="@string/pref_header_about"
+        android:summary="@string/pref_summary_about"/>
+
+</preference-headers>
