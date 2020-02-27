@@ -34,7 +34,7 @@
             android:singleLine="true"
             android:text="@string/menu_copyright"
             android:textAlignment="center"
-            android:textSize="10sp" />
+            android:textSize="9sp" />
     </android.support.design.widget.NavigationView>
 
 </android.support.v4.widget.DrawerLayout>

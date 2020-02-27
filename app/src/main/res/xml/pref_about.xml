@@ -3,20 +3,20 @@
 
     <Preference
         android:defaultValue="@string/version"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/ic_app"
         android:key="version"
         android:selectable="false"
         android:shouldDisableView="false"
         android:summary="@string/version"
-        android:title="@string/about_app_title"></Preference>
+        android:title="@string/about_app_title" />
 
-<Preference
-    android:icon="@drawable/ic_copyright"
-    android:selectable="false"
-    android:shouldDisableView="false"
-    android:summary="@string/about_copyright"
-    android:title="@string/empty">
+    <Preference
+        android:icon="@drawable/ic_copyright"
+        android:selectable="false"
+        android:shouldDisableView="false"
+        android:summary="@string/about_copyright"
+        android:title="@string/empty">
 
-</Preference>
+    </Preference>
 
 </PreferenceScreen>

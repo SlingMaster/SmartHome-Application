@@ -24,12 +24,11 @@
         android:icon="@drawable/ic_user_settings"
         android:selectable="false"
         android:shouldDisableView="false"
-        android:title="@string/user_settings_title">
-    </Preference>
+        android:title="@string/user_settings_title" />
     <EditTextPreference
         android:defaultValue="@string/edit_home_ssid_default"
         android:icon="@drawable/ic_router"
-        android:key="edit_ssid"
+        android:key="home_ssid"
         android:selectAllOnFocus="true"
         android:singleLine="true"
         android:summary="@string/edit_home_ssid_default"
