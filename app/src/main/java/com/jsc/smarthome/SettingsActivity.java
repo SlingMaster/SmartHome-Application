@@ -177,7 +177,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
             // guidelines.
-            bindPreferenceSummaryToValue(findPreference("edit_ssid"));
+            bindPreferenceSummaryToValue(findPreference("home_ssid"));
             bindPreferenceSummaryToValue(findPreference("edit_esp_ip"));
             bindPreferenceSummaryToValue(findPreference("edit_measurement"));
         }

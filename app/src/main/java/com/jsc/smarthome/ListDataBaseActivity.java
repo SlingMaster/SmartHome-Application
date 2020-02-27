@@ -1,11 +1,11 @@
 
 package com.jsc.smarthome;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -86,8 +86,6 @@ public class ListDataBaseActivity extends AppCompatActivity {
                 .setShowAsAction(
                         MenuItem.SHOW_AS_ACTION_ALWAYS
                                 | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
-
-
         return true;
     }
 
@@ -126,7 +124,5 @@ public class ListDataBaseActivity extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
     }
 }
-

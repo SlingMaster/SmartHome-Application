@@ -1,88 +1,86 @@
 /*
- * Copyright (c) 2018. Jeneral Samopal Company
+ * Copyright (c) 2020 Jeneral Samopal Company
  * Design and Programming by Alex Dovby
  */
 
 package com.jsc.smarthome;
 
+import android.app.Activity;
 import android.os.Environment;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 
 public class FileUtils {
 
     // =========================================================
-    public static void writeFileSD(String sd_path, String file_name, String data) {
-        // проверяем доступность SD
-        if (!Environment.getExternalStorageState().equals(
-                Environment.MEDIA_MOUNTED)) {
-            System.out.println("SD-карта не доступна: " + Environment.getExternalStorageState());
-            return;
-        }
-        // получаем путь к SD
-        File sdPath = Environment.getExternalStorageDirectory();
-
-
-        // добавляем свой каталог к пути
-        sdPath = new File(sdPath.getAbsolutePath() + "/" + sd_path);
-        // создаем каталог
-        if (!sdPath.exists()) {
-            sdPath.mkdir();
-        }
-
-        // формируем объект File, который содержит путь к файлу
-        File sdFile = new File(sdPath, file_name);
-        // System.out.println("sdFile : " + sdFile);
+    public static void SaveFile(String filePath, String FileContent) {
+        //Создание объекта файла.
+        File file = Environment.getExternalStorageDirectory();
+        File fhandle = new File(file.getAbsolutePath() + filePath);
         try {
-            // открываем поток для записи
-            BufferedWriter bw = new BufferedWriter(new FileWriter(sdFile));
-            // пишем данные
-            bw.write(data);
-            // закрываем поток
-            bw.close();
-            // System.out.println("Файл записан на SD: " + sdFile.getAbsolutePath());
+            //Если нет директорий в пути, то они будут созданы:
+            if (!fhandle.getParentFile().exists()) {
+                fhandle.getParentFile().mkdirs();
+            }
+            //Если файл существует, то он будет перезаписан:
+            fhandle.createNewFile();
+            FileOutputStream fOut = new FileOutputStream(fhandle);
+            OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
+            myOutWriter.write(FileContent);
+            myOutWriter.close();
+            fOut.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
+            System.out.println("Path " + filePath + ", " + e.toString());
         }
     }
 
     // =========================================================
-    public static String readFileSD(String sd_path, String file_name) {
-        // проверяем доступность SD
-        String str = "";
-        if (!Environment.getExternalStorageState().equals(
-                Environment.MEDIA_MOUNTED)) {
-            System.out.println("SD-карта не доступна: " + Environment.getExternalStorageState());
-            return str;
-        }
+    public static String readFile(Activity main, String filePath) {
+        String state = Environment.getExternalStorageState();
+        StringBuilder textBuilder;
+        if (!(state.equals(Environment.MEDIA_MOUNTED))) {
+            Toast.makeText(main, R.string.msg_no_sd, Toast.LENGTH_LONG).show();
+        } else {
+            BufferedReader reader = null;
+            try {
+                File file = Environment.getExternalStorageDirectory();
+                File textFile = new File(file.getAbsolutePath() + filePath);
+                reader = new BufferedReader(new FileReader(textFile));
+                textBuilder = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    textBuilder.append(line);
+                    textBuilder.append("\n");
+                }
 
-        // получаем путь к SD
-        File sdPath = Environment.getExternalStorageDirectory();
-        // добавляем свой каталог к пути
-        sdPath = new File(sdPath.getAbsolutePath() + "/" + sd_path);
-        // формируем объект File, который содержит путь к файлу
-        File sdFile = new File(sdPath, file_name);
-        // System.out.println("Read file: " +  sdFile);
-        try {
-            // открываем поток для чтения
-            BufferedReader br = new BufferedReader(new FileReader(sdFile));
-            // читаем содержимое
-            while ((str = br.readLine()) != null) {
-                // System.out.println("log json : " + str);
-                return str;
+                // System.out.println("trace | Path " + filePath + ", src : " + textBuilder);
+                return textBuilder.toString();
+
+            } catch (FileNotFoundException e) {
+                // TODO: handle exception
+                e.printStackTrace();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } finally {
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
-
-        return str;
+        return null;
     }
 }

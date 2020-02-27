@@ -5,30 +5,29 @@
 
 package com.jsc.smarthome;
 
-import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.os.PowerManager;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
@@ -45,34 +44,30 @@ import jsinterface.JSOut;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     protected static final String TAG = "tag" + MainActivity.class.getSimpleName();
-    final String DIR_SD = "SmartHomeDB";
-    final String FILENAME_LOG = "data_base.json";
+    final String FILE_DB = "/SmartHomeDB/data_base.json";
     final static int REQUEST_CODE_CLEAR = 1;
-    public static final int PERMISSION_REQUEST_CODE = 101;
-    public static final int PERMISSION_CHANGE_TIMEOUT = 10000;
 
     private static Boolean dev_mode = false;
+    private long back_pressed;
     DrawerLayout drawer;
     NavigationView navigationView;
     SharedPreferences preference;
+    AlertDialog.Builder mAlertDialog;
     WebView webView;
-
-
-    // stop screen from dimming
-    PowerManager powerManager;
-    private static PowerManager.WakeLock wakeLock = null;
-
 
     // js interface ------------
     protected JSOut jsOut;
     public JSONObject uiRequest;
     public static JSONArray jsonDataBaseArray = new JSONArray();
 
-
+    // ===================================
     @Override
+    @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        comparePermission();
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        Permission.requestMultiplePermissions(this, Permission.PERMISSION_REQUEST_CODE);
 
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -108,16 +103,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        // ------------------------------------
-        // PowerManager
-        // Stop screen from dimming
-        // ------------------------------------
-        if (wakeLock == null) {
-            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-            // Create a bright wake lock
-            wakeLock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE, TAG);
-        }
-
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
@@ -134,10 +119,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // set default black color ------------
         webView.setBackgroundColor(0);
 
+
         // web settings --------------------------------------
         WebSettings webSettings = webView.getSettings();
         // включаем поддержку JavaScript
         webView.getSettings().setJavaScriptEnabled(true);
+
         // определим экземпляр MyWebViewClient.
         // Он может находиться в любом месте после инициализации объекта WebView
         webView.setWebViewClient(new MyWebViewClient());
@@ -165,12 +152,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         webSettings.setUseWideViewPort(true);
         webSettings.setLoadWithOverviewMode(true);
         // ---------------------------------------------------
+        // set max font size ---------------------------------
+        if (webSettings.getTextZoom() > 125) {
+            webSettings.setTextZoom(125);
+        }
+
+        // ---------------------------------------------------
         // load html
         loadHtml(getResources().getString(R.string.sh_url));
         // ---------------------------------------------------
 
         // load json BD results ------------------------------
-        jsonDataBaseArray = parseFileDataBase(FileUtils.readFileSD(DIR_SD, FILENAME_LOG));
+        jsonDataBaseArray = parseFileDataBase(FileUtils.readFile(this, FILE_DB));
         // ---------------------------------------------------
     }
 
@@ -214,32 +207,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // ------------------------------------.
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        try {
-            wakeLock.release();
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            Log.e("wakeLock | release", e.getMessage());
-        }
-    }
-
+    // ===================================
     @Override
     public void onBackPressed() {
-        // DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
+        if (back_pressed + 2000 > System.currentTimeMillis()) {
             super.onBackPressed();
+        } else {
+            Toast.makeText(getBaseContext(), getResources().getString(R.string.msg_exit),
+                    Toast.LENGTH_SHORT).show();
         }
+        back_pressed = System.currentTimeMillis();
     }
 
 
-    @SuppressWarnings("StatementWithEmptyBody")
+    // ===================================
     @Override
-
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
@@ -281,24 +263,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // System.out.println("requestCode = " + requestCode + ", resultCode = " + resultCode);
         if (resultCode == RESULT_OK) {
-            switch (requestCode) {
-                case REQUEST_CODE_CLEAR:
-                    String idClear = data.getStringExtra("clear");
-                    // System.out.println("REQUEST_CODE_CLEAR | idClear : " + idClear);
-                    if (idClear.equalsIgnoreCase("all_records")) {
-                        jsonDataBaseArray = new JSONArray();
-                        //writeFile();
-                    } else {
-                        jsonDataBaseArray.remove(jsonDataBaseArray.length() - 1);
-                        // writeFile();
-
-                    }
-                    FileUtils.writeFileSD(DIR_SD, FILENAME_LOG, jsonDataBaseArray.toString());
-                    break;
-                default:
-                    break;
+            if (requestCode == REQUEST_CODE_CLEAR) {
+                String idClear = data.getStringExtra("clear");
+                if (idClear != null && idClear.equalsIgnoreCase("all_records")) {
+                    jsonDataBaseArray = new JSONArray();
+                } else {
+                    jsonDataBaseArray.remove(jsonDataBaseArray.length() - 1);
+                }
+                FileUtils.SaveFile(FILE_DB, jsonDataBaseArray.toString());
             }
         }
     }
@@ -339,11 +312,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // ----------------------------------------
 
     public JSONObject initData() {
+        boolean is_home_network = false;
         JSONObject obj = new JSONObject();
-        String home_ssid = preference.getString("edit_ssid", "dev");
+        String home_ssid = preference.getString("home_ssid", getResources().getString(R.string.ssid_default));
         String cur_ssid = getCurrentSsid(getApplicationContext());
-        Boolean is_home_network = home_ssid.equalsIgnoreCase(cur_ssid);
-        // System.out.println("cur_ssid:" + cur_ssid + "| home_ssid:" + home_ssid + "|" + home_ssid.equalsIgnoreCase(cur_ssid));
+        is_home_network = home_ssid.equalsIgnoreCase(cur_ssid);
+
+        System.out.println("cur_ssid: " + cur_ssid + " | home_ssid:" + home_ssid + " | " + is_home_network);
         try {
             obj.put("android_os", android.os.Build.VERSION.SDK_INT);
             obj.put("language", "en");
@@ -380,8 +355,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             e.printStackTrace();
         }
 
-        // PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "My Tag");
-
         switch (request) {
             case JSConstants.EVT_MAIN_TEST:
                 callbackToUI(JSConstants.EVT_MAIN_TEST, createResponse(requestContent, null));
@@ -389,31 +362,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case JSConstants.EVT_READY:
                 callbackToUI(JSConstants.CMD_INIT, createResponse(requestContent, initData()));
                 break;
-            case JSConstants.CMD_MEASUREMENT_START:
-                try {
-                    wakeLock.acquire();
-                } catch (Exception e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                    Log.e("wakeLock | acquire", e.getMessage());
-                }
-                break;
-            case JSConstants.CMD_MEASUREMENT_END:
-                break;
+            // case JSConstants.CMD_MEASUREMENT_START:
+            //     // TODO Auto-generated catch block
+            //     break;
+            // case JSConstants.CMD_MEASUREMENT_END:
+            //    break;
             case JSConstants.CMD_MEASUREMENT_RESULT:
                 jsonDataBaseArray.put(jsonString);
-                FileUtils.writeFileSD(DIR_SD, FILENAME_LOG, jsonDataBaseArray.toString());
-                try {
-                    wakeLock.release();
-                } catch (Exception e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                    Log.e("wakeLock | release", e.getMessage());
-                }
+                FileUtils.SaveFile(FILE_DB, jsonDataBaseArray.toString());
                 break;
             case JSConstants.CMD_SHOW_LIST:
-                //System.out.println("[ html > android ] tag | NativeAppResponseData:" + jsonString);
-                jsonDataBaseArray = parseFileDataBase(FileUtils.readFileSD(DIR_SD, FILENAME_LOG));
+                jsonDataBaseArray = parseFileDataBase(FileUtils.readFile(this, FILE_DB));
                 showListBD(getApplicationContext());
                 break;
             case JSConstants.EVT_BACK:
@@ -431,8 +390,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     // =========================================================
-    // Interface HTML > Application
-    // =========================================================
+// Interface HTML > Application
+// =========================================================
     private class JSIn {
 
         private JSIn() {
@@ -462,7 +421,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         String ssid = null;
         ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-        if (networkInfo.isConnected()) {
+        if (networkInfo != null && networkInfo.isConnected()) {
             final WifiManager wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
             final WifiInfo connectionInfo = wifiManager.getConnectionInfo();
             if (connectionInfo != null) {
@@ -473,7 +432,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else {
             ssid = "emulator wifi";
         }
-        // System.out.println("ssid : " + ssid);
+        System.out.println("ssid : " + ssid);
         return ssid;
     }
 
@@ -496,31 +455,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // ===================================================
     // Permissions
     // ===================================================
-    public void requestMultiplePermissions() {
-        // вызов dialog на получение доступа к SD Card
-        ActivityCompat.requestPermissions(this,
-                new String[]{
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                        Manifest.permission.READ_EXTERNAL_STORAGE
-                },
-                PERMISSION_REQUEST_CODE);
-
-        new android.os.Handler().postDelayed(new Runnable() {
-            public void run() {
-
-
-            }
-        }, PERMISSION_CHANGE_TIMEOUT);
-    }
-
-    // ===================================================
-    private void comparePermission() {
-        boolean mobile_data_permission =
-                ContextCompat.checkSelfPermission(getApplicationContext(),
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
-        if (!mobile_data_permission) {
-            requestMultiplePermissions();
-        }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        Permission.comparePermissions(this, requestCode, permissions, grantResults);
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 }
 

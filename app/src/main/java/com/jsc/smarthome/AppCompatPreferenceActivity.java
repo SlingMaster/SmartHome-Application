@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.support.annotation.LayoutRes;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatDelegate;
@@ -35,16 +36,24 @@ public abstract class AppCompatPreferenceActivity extends PreferenceActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            // SourceTree
-            case android.R.id.home:
-                onBackPressed();
-                return true;
-            default:
-                break;
+        if (item.getItemId() == android.R.id.home) {
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
+
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item) {
+//        switch (item.getItemId()) {
+//            // SourceTree
+//            case android.R.id.home:
+//                onBackPressed();
+//                return true;
+//            default:
+//                break;
+//        }
+//        return super.onOptionsItemSelected(item);
+//    }
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
@@ -61,6 +70,7 @@ public abstract class AppCompatPreferenceActivity extends PreferenceActivity {
     }
 
     @Override
+    @NonNull
     public MenuInflater getMenuInflater() {
         return getDelegate().getMenuInflater();
     }
@@ -130,7 +140,7 @@ public abstract class AppCompatPreferenceActivity extends PreferenceActivity {
     // ----------------------------------------
     private void resetPreferencesDefault() {
         SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(this);
-        Boolean reset_default = preference.getBoolean("sw_reset_default", false);
+        boolean reset_default = preference.getBoolean("sw_reset_default", false);
         if (reset_default) {
             // reset default settings
             preference.edit().clear().apply();
@@ -142,7 +152,7 @@ public abstract class AppCompatPreferenceActivity extends PreferenceActivity {
             editor.putString("dev_stats_url", getResources().getString(R.string.default_debug_stats_url));
             editor.putString("dev_test_url", getResources().getString(R.string.default_debug_test_url));
 
-            editor.putString("edit_ssid", getResources().getString(R.string.edit_home_ssid_default));
+            editor.putString("home_ssid", getResources().getString(R.string.edit_home_ssid_default));
             editor.putString("edit_esp_ip", getResources().getString(R.string.edit_esp_ip_default));
             editor.putString("edit_measurement", getResources().getString(R.string.edit_interval_default));
             // editor.putString("debug_stats_url", getResources().getString(R.string.default_debug_stats_url));
