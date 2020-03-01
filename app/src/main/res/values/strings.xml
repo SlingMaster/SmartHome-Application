@@ -5,9 +5,9 @@
     <string name="empty" />
     <string name="sh_url">file:///android_asset/main_sha.html</string>
     <string name="br_url">file:///android_asset/main_wra.html</string>
-    <string name="stats_url">file:///android_asset/statistic/index.html</string>
+    <!--    <string name="stats_url_local">file:///android_asset/statistic/index.html</string>-->
     <string name="test_url">file:///android_asset/test_measurement/index.html</string>
-    <string name="stats_url_local">http://winecard.ltd.ua/dev/smart_home/hw_statistic/</string>
+    <string name="stats_url">http://winecard.ltd.ua/dev/smart_home/hw_statistic/index.html</string>
 
     <string name="default_debug_br_url">http://192.168.1.2/SmartHome/mainWRD.html</string>
     <string name="default_debug_sh_url">http://192.168.1.2/SmartHome/mainSHD.html</string>
