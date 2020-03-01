@@ -37,23 +37,11 @@ public abstract class AppCompatPreferenceActivity extends PreferenceActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
-
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        switch (item.getItemId()) {
-//            // SourceTree
-//            case android.R.id.home:
-//                onBackPressed();
-//                return true;
-//            default:
-//                break;
-//        }
-//        return super.onOptionsItemSelected(item);
-//    }
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {

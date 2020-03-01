@@ -5,13 +5,14 @@
     <!--color name="colorAccent">#00e5ff</color-->
     <!--color name="colorAccent">#0090D0</color-->
     <color name="colorPrimary">@color/colorPrimaryDark</color>
-    <color name="colorPrimaryDark">#000a12</color>
+    <color name="colorPrimaryDark">#000A12</color>
     <color name="colorAccent">#0091EA</color>
     <color name="colorPreferencesBg">@color/colorPrimaryDark</color>
-    <!--color name="colorPreferencesBg">#FF2C4350</color-->
+    <color name="colorNavBar">#FF000000</color>
     <color name="colorIcons">@color/colorAccent</color>
     <color name="colorIconsTitle">@android:color/white</color>
     <color name="colorDebugIcon">#f9a825</color>
+    <color name="colorTitleBG">#001A22</color>
 
 
     <color name="item_text_date">#cfd8dc</color>
@@ -21,5 +22,9 @@
     <color name="item_text_warmer">#FF0031</color>
 
     <color name="actionbar_background">#669f36</color>
-    <color name="actionbar_text_color">#ffffff</color>
+    <color name="actionbar_text_color">#FFFFFF</color>
+
+    <color name="black_overlay">#66000000</color>
+    <color name="colorTextDesc">#B0BEC5</color>
+    <color name="colorSmallText">#CFD8DC</color>
 </resources>

@@ -17,18 +17,22 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 
-public class FileUtils {
+class FileUtils {
 
     // =========================================================
-    public static void SaveFile(String filePath, String FileContent) {
+    static void SaveFile(String filePath, String FileContent) {
         //Создание объекта файла.
         File file = Environment.getExternalStorageDirectory();
         File fhandle = new File(file.getAbsolutePath() + filePath);
         try {
             //Если нет директорий в пути, то они будут созданы:
-            if (!fhandle.getParentFile().exists()) {
-                fhandle.getParentFile().mkdirs();
+            File parentFile = fhandle.getParentFile();
+            if (parentFile != null) {
+                if (!parentFile.exists()) {
+                    parentFile.mkdirs();
+                }
             }
+
             //Если файл существует, то он будет перезаписан:
             fhandle.createNewFile();
             FileOutputStream fOut = new FileOutputStream(fhandle);
@@ -43,7 +47,7 @@ public class FileUtils {
     }
 
     // =========================================================
-    public static String readFile(Activity main, String filePath) {
+    static String readFile(Activity main, String filePath) {
         String state = Environment.getExternalStorageState();
         StringBuilder textBuilder;
         if (!(state.equals(Environment.MEDIA_MOUNTED))) {
@@ -60,7 +64,6 @@ public class FileUtils {
                     textBuilder.append(line);
                     textBuilder.append("\n");
                 }
-
                 // System.out.println("trace | Path " + filePath + ", src : " + textBuilder);
                 return textBuilder.toString();
 

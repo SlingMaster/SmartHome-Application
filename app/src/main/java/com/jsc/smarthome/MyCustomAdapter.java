@@ -25,7 +25,7 @@ public class MyCustomAdapter extends BaseAdapter {
     private LayoutInflater mLayoutInflater;
     private Context context;
 
-    public MyCustomAdapter(Context context, ArrayList<String> arrayList) {
+    MyCustomAdapter(Context context, ArrayList<String> arrayList) {
         this.context = context;
         mListItems = arrayList;
 
@@ -57,7 +57,7 @@ public class MyCustomAdapter extends BaseAdapter {
     public View getView(int position, View view, ViewGroup viewGroup) {
         //check to see if the reused view is null or not, if is not null then reuse it
         if (view == null) {
-            view = mLayoutInflater.inflate(R.layout.list_item, null);
+            view = mLayoutInflater.inflate(R.layout.list_item, viewGroup, false);
         }
 
         //get the string item from the position "position" from array list to put it on the TextView
@@ -69,13 +69,13 @@ public class MyCustomAdapter extends BaseAdapter {
 
 
         if (stringItem != null) {
-            TextView itemDate = (TextView) view.findViewById(R.id.list_item_text_date);
-            TextView itemTime = (TextView) view.findViewById(R.id.list_item_text_time);
-            TextView itemDelta = (TextView) view.findViewById(R.id.list_item_text_delta);
-            TextView itemValue = (TextView) view.findViewById(R.id.list_item_text_value);
+            TextView itemDate = view.findViewById(R.id.list_item_text_date);
+            TextView itemTime = view.findViewById(R.id.list_item_text_time);
+            TextView itemDelta = view.findViewById(R.id.list_item_text_delta);
+            TextView itemValue = view.findViewById(R.id.list_item_text_value);
 
             // set icon -----------------------------------------
-            ImageView itemIcon = (ImageView) view.findViewById(R.id.list_item_image_view);
+            ImageView itemIcon = view.findViewById(R.id.list_item_image_view);
             itemIcon.setImageResource(iconID);
 
             if (itemDate != null) {
@@ -86,11 +86,11 @@ public class MyCustomAdapter extends BaseAdapter {
                     e.printStackTrace();
                 }
                 itemDate.setText(obj.optString("date"));
-               itemTime.setText(obj.optString("time"));
-               String str_tmp = "Time: " + obj.optString("time");
-               itemTime.setText(str_tmp);
-               str_tmp = obj.optString("value") + "°C";
-               itemValue.setText(str_tmp);
+                itemTime.setText(obj.optString("time"));
+                String str_tmp = "Time: " + obj.optString("time");
+                itemTime.setText(str_tmp);
+                str_tmp = obj.optString("value") + "°C";
+                itemValue.setText(str_tmp);
                 itemIcon.setColorFilter(getIconColor(obj.optString("attribute")));
                 itemDelta.setText(obj.optString("delta"));
                 if (obj.optBoolean("warmer")) {
