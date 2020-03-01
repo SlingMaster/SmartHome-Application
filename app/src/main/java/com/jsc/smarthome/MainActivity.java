@@ -21,13 +21,11 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
@@ -46,13 +44,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected static final String TAG = "tag" + MainActivity.class.getSimpleName();
     final String FILE_DB = "/SmartHomeDB/data_base.json";
     final static int REQUEST_CODE_CLEAR = 1;
-
+    static String cur_ssid;
     private static Boolean dev_mode = false;
     private long back_pressed;
     DrawerLayout drawer;
     NavigationView navigationView;
     SharedPreferences preference;
-    AlertDialog.Builder mAlertDialog;
     WebView webView;
 
     // js interface ------------
@@ -65,60 +62,41 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
         Permission.requestMultiplePermissions(this, Permission.PERMISSION_REQUEST_CODE);
 
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.hide();
         }
 
-        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-
-//        toggle = new ActionBarDrawerToggle(this, drawer,
-//                toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
-//
-//            /** Called when a drawer has settled in a completely closed state. */
-//            public void onDrawerClosed(View view) {
-//                super.onDrawerClosed(view);
-//                // Do whatever you want here
-//                System.out.println("onDrawerClosed");
-//            }
-//
-//            /** Called when a drawer has settled in a completely open state. */
-//            public void onDrawerOpened(View drawerView) {
-//                super.onDrawerOpened(drawerView);
-//                // Do whatever you want here
-//                System.out.println("onDrawerOpened");
-//                View item = (View) findViewById(R.id.nav_sh);
-//                System.out.println("onDrawerOpened : " + item);
-//            }
-//        };
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
 
         // ------------------------------------
         // WebView
         // ------------------------------------
-        webView = (WebView) findViewById(R.id.web_view);
+        webView = findViewById(R.id.web_view);
         // set WebView Style background and scrollbar ----
         webView.setVerticalScrollBarEnabled(false);
         webView.setHorizontalScrollBarEnabled(false);
-        //webView.setScrollBarStyle(WebView.SCROLLBARS_OUTSIDE_OVERLAY);
-        //webView.setScrollbarFadingEnabled(false);
         // set default black color ------------
         webView.setBackgroundColor(0);
+        // webView.clearCache(true);
 
+        // js interface --------------------------------------
+        jsOut = new JSOut(webView);
+        JSIn jsIn = new JSIn();
+        webView.addJavascriptInterface(jsIn, JSConstants.INTERFACE_NAME);
 
         // web settings --------------------------------------
         WebSettings webSettings = webView.getSettings();
@@ -128,18 +106,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // определим экземпляр MyWebViewClient.
         // Он может находиться в любом месте после инициализации объекта WebView
         webView.setWebViewClient(new MyWebViewClient());
-//        webView.setWebChromeClient(new WebChromeClient() {
-//            @Override
-//            public void onProgressChanged(WebView view, int newProgress) {
-//                //change your progress bar
-//                Log.w(TAG, "onProgressChanged : " + newProgress + "%");
-//                if (newProgress > 50) {
-//                    //progressBar.setVisibility(View.GONE);
-//                    webView.setVisibility(View.VISIBLE);
-//                }
-//            }
-//        });
-
         webSettings.setSupportZoom(false);
         webSettings.setBuiltInZoomControls(false);
         webSettings.setLoadsImagesAutomatically(true);
@@ -148,7 +114,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // set cash app ---------------------------------------
         webSettings.setAppCacheEnabled(true);
         // set wiewport scale ---------------
-        // webSettings.setUseWideViewPort(isWideViewPortRequired());
         webSettings.setUseWideViewPort(true);
         webSettings.setLoadWithOverviewMode(true);
         // ---------------------------------------------------
@@ -165,6 +130,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // load json BD results ------------------------------
         jsonDataBaseArray = parseFileDataBase(FileUtils.readFile(this, FILE_DB));
         // ---------------------------------------------------
+        cur_ssid = getCurrentSsid(getApplicationContext());
+        System.out.println("\n\nCreate");
+        System.out.println("\nCur ssid : " + cur_ssid);
     }
 
     @Override
@@ -187,10 +155,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         webView.clearCache(true);
         webView.loadUrl(url);
 
-        // js interface --------------------------------------
-        jsOut = new JSOut(webView);
-        JSIn jsIn = new JSIn();
-        webView.addJavascriptInterface(jsIn, JSConstants.INTERFACE_NAME);
+
     }
 
     @Override
@@ -202,8 +167,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // show developer mode ----------------
         Menu menu = navigationView.getMenu();
         menu.findItem(R.id.nav_dev_mode).setVisible(dev_mode);
-        // menu.findItem(R.id.nav_dev_mode).setIcon(R.drawable.ic_delete);
-        // System.out.println("dev_mode : " + dev_mode);
         // ------------------------------------.
     }
 
@@ -224,6 +187,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
+        // getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        setShowWhenLocked(false);
         int id = item.getItemId();
         if (id == R.id.nav_br) {
             loadHtml(
@@ -256,7 +221,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             showConfig(getApplicationContext());
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -312,10 +277,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // ----------------------------------------
 
     public JSONObject initData() {
-        boolean is_home_network = false;
+        boolean is_home_network;
         JSONObject obj = new JSONObject();
+
         String home_ssid = preference.getString("home_ssid", getResources().getString(R.string.ssid_default));
-        String cur_ssid = getCurrentSsid(getApplicationContext());
         is_home_network = home_ssid.equalsIgnoreCase(cur_ssid);
 
         System.out.println("cur_ssid: " + cur_ssid + " | home_ssid:" + home_ssid + " | " + is_home_network);
@@ -323,14 +288,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             obj.put("android_os", android.os.Build.VERSION.SDK_INT);
             obj.put("language", "en");
             obj.put("esp_ip", preference.getString("esp_ip", getResources().getString(R.string.edit_esp_ip_default)));
-            obj.put("measurement_interval", ((int) Integer.parseInt(preference.getString("edit_measurement", "120"))));
+            obj.put("measurement_interval", (Integer.parseInt(preference.getString("edit_measurement", "120"))));
             obj.put("is_home_network", is_home_network);
             obj.put("network", (is_home_network ? getResources().getString(R.string.home_network) : getResources().getString(R.string.guest_network)));
             obj.put("ssid", cur_ssid);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        // System.out.println("initData : " + obj.toString());
         return obj;
     }
 
@@ -362,12 +326,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case JSConstants.EVT_READY:
                 callbackToUI(JSConstants.CMD_INIT, createResponse(requestContent, initData()));
                 break;
-            // case JSConstants.CMD_MEASUREMENT_START:
-            //     // TODO Auto-generated catch block
-            //     break;
-            // case JSConstants.CMD_MEASUREMENT_END:
-            //    break;
             case JSConstants.CMD_MEASUREMENT_RESULT:
+                setShowWhenLocked(true);
                 jsonDataBaseArray.put(jsonString);
                 FileUtils.SaveFile(FILE_DB, jsonDataBaseArray.toString());
                 break;
@@ -404,7 +364,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-
     // ----------------------------------------
     protected void callbackToUI(int target, JSONObject json) {
         if (jsOut != null) {
@@ -417,25 +376,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // =========================================================
     // utils
     // =========================================================
-    private String getCurrentSsid(Context context) {
+    public static String getCurrentSsid(Context context) {
         String ssid = null;
-        ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-        if (networkInfo != null && networkInfo.isConnected()) {
-            final WifiManager wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-            final WifiInfo connectionInfo = wifiManager.getConnectionInfo();
-            if (connectionInfo != null) {
-                ssid = connectionInfo.getSSID().replaceAll("\"", "");
-            } else {
-                ssid = "developer wifi";
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo;
+        if (cm != null) {
+            networkInfo = cm.getActiveNetworkInfo();
+            if (networkInfo == null) {
+                return null;
             }
-        } else {
-            ssid = "emulator wifi";
+
+            if (networkInfo.isConnected()) {
+                final WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+                if (wifiManager != null) {
+                    final WifiInfo connectionInfo = wifiManager.getConnectionInfo();
+                    if (connectionInfo != null) {
+                        ssid = connectionInfo.getSSID().replaceAll("\"", "");
+                    }
+                }
+            }
         }
-        System.out.println("ssid : " + ssid);
         return ssid;
     }
-
 
     // =========================================================
     public static JSONArray parseFileDataBase(String jsonList) {
@@ -443,12 +405,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         JSONArray json;
         try {
             json = new JSONArray(jsonList);
-            // System.out.println("parseLogFile:" + json);
         } catch (JSONException e) {
             json = new JSONArray();
             e.printStackTrace();
         }
-        // System.out.println("parseLogFile:" + json);
         return json;
     }
 

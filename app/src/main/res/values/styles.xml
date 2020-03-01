@@ -9,6 +9,7 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:actionBarStyle">@style/MyActionBar</item>
+        <item name="android:navigationBarColor">@color/colorNavBar</item>
     </style>
 
 
@@ -30,6 +31,10 @@
         <!--item name="android:colorBackground">@color/colorPreferencesBg</item>
         <item name="android:colorForeground">@color/item_text_time</item-->
         <item name="android:textColorPrimary">@android:color/secondary_text_light_nodisable</item>
+        <item name="android:paddingLeft">@dimen/list_padding</item>
+        <item name="android:paddingRight">@dimen/list_padding</item>
+        <item name="android:textAlignment">center</item>
+        <!--        <item name="android:textColorPrimary">@color/colorAccent</item>-->
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
@@ -39,10 +44,10 @@
     <style name="PreferencesTheme" parent="Base.Theme.AppCompat">
         <item name="android:windowBackground">@color/colorPreferencesBg</item>
         <item name="android:colorAccent">@color/colorAccent</item>
-
         <item name="android:textColorPrimary">#FFFFFF</item>
         <item name="android:textColor">#cfd8dc</item>
         <item name="android:textColorSecondary">#819ca9</item>
+        <item name="android:navigationBarColor">@color/colorNavBar</item>
 
 
         <!-- PreferencesTheme ActionBar Style -->
